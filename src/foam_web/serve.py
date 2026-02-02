@@ -1,7 +1,6 @@
 """Web server for browsing and rendering Markdown files with syntax highlighting."""
 
 import html
-import os
 import urllib.parse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
@@ -9,8 +8,9 @@ from pathlib import Path
 from markdown_it import MarkdownIt
 from mdit_py_plugins.front_matter import front_matter_plugin
 from pygments import highlight
-from pygments.formatters import HtmlFormatter
-from pygments.lexers import get_lexer_by_name, guess_lexer, TextLexer
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers import get_lexer_by_name, guess_lexer
+from pygments.lexers.special import TextLexer
 
 FORMATTER = HtmlFormatter(style="monokai")
 CSS = FORMATTER.get_style_defs(".highlight")
@@ -24,7 +24,9 @@ def highlighter(code, lang, _attrs):
     return highlight(code, lexer, FORMATTER)
 
 
-md = MarkdownIt("commonmark", {"highlight": highlighter}).enable(["table", "strikethrough"])
+md = MarkdownIt("commonmark", {"highlight": highlighter}).enable(
+    ["table", "strikethrough"]
+)
 front_matter_plugin(md)
 
 TEMPLATE = """<!doctype html>
@@ -89,12 +91,16 @@ class Handler(SimpleHTTPRequestHandler):
             cls = "dir" if e.is_dir() else ("md" if e.suffix == ".md" else "file")
             items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
         body = f"<ul>{''.join(items)}</ul>" if items else "<p><em>empty</em></p>"
-        page = TEMPLATE.format(css=CSS, title=str(rel) or "~", nav=breadcrumbs(rel), body=body)
+        page = TEMPLATE.format(
+            css=CSS, title=str(rel) or "~", nav=breadcrumbs(rel), body=body
+        )
         self.respond(page)
 
     def serve_md(self, rel: Path, full: Path):
         body = md.render(full.read_text())
-        page = TEMPLATE.format(css=CSS, title=full.name, nav=breadcrumbs(rel.parent), body=body)
+        page = TEMPLATE.format(
+            css=CSS, title=full.name, nav=breadcrumbs(rel.parent), body=body
+        )
         self.respond(page)
 
     def serve_raw(self, rel: Path, full: Path):
@@ -107,7 +113,9 @@ class Handler(SimpleHTTPRequestHandler):
                 lexer = None
         if lexer:
             body = highlight(full.read_text(), lexer, FORMATTER)
-            page = TEMPLATE.format(css=CSS, title=full.name, nav=breadcrumbs(rel.parent), body=body)
+            page = TEMPLATE.format(
+                css=CSS, title=full.name, nav=breadcrumbs(rel.parent), body=body
+            )
             self.respond(page)
         else:
             self.send_response(200)
@@ -120,20 +128,21 @@ class Handler(SimpleHTTPRequestHandler):
 
 def make_handler(root: Path):
     """Create a Handler class with the given root directory."""
+
     class ConfiguredHandler(Handler):
         pass
+
     ConfiguredHandler.root = root
     return ConfiguredHandler
 
 
-def main():
-    """Entry point for the foam-web server."""
-    root = Path(os.environ.get("SERVE_ROOT", Path.home()))
-    port = int(os.environ.get("SERVE_PORT", "8080"))
-
-    print(f"Serving {root} on http://0.0.0.0:{port}")
-    HTTPServer(("0.0.0.0", port), make_handler(root)).serve_forever()
+def run_server(root: Path, bind: str, port: int):
+    """Run the foam-web server."""
+    print(f"Serving {root} on http://{bind}:{port}")
+    HTTPServer((bind, port), make_handler(root)).serve_forever()
 
 
 if __name__ == "__main__":
+    from foam_web.cli import main
+
     main()

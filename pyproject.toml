@@ -5,12 +5,13 @@ description = "A simple web server for browsing and rendering Markdown files"
 requires-python = ">=3.12"
 dependencies = [
     "markdown-it-py",
-    "pygments",
     "mdit-py-plugins",
+    "pygments",
+    "typer",
 ]
 
 [project.scripts]
-foam-web = "foam_web.serve:main"
+foam-web = "foam_web.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.6.6,<0.7"]
