@@ -1,8 +1,4 @@
-#!/usr/bin/env -S uv run
-# /// script
-# requires-python = ">=3.12"
-# dependencies = ["markdown-it-py", "pygments", "mdit-py-plugins"]
-# ///
+"""Web server for browsing and rendering Markdown files with syntax highlighting."""
 
 import html
 import os
@@ -15,9 +11,6 @@ from mdit_py_plugins.front_matter import front_matter_plugin
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import get_lexer_by_name, guess_lexer, TextLexer
-
-ROOT = Path(os.environ.get("SERVE_ROOT", Path.home()))
-PORT = int(os.environ.get("SERVE_PORT", "8080"))
 
 FORMATTER = HtmlFormatter(style="monokai")
 CSS = FORMATTER.get_style_defs(".highlight")
@@ -59,11 +52,13 @@ def breadcrumbs(rel: Path) -> str:
 
 
 class Handler(SimpleHTTPRequestHandler):
+    root: Path
+
     def do_GET(self):
         path = urllib.parse.unquote(self.path.split("?")[0])
         rel = Path(path.lstrip("/"))
-        full = (ROOT / rel).resolve()
-        if not str(full).startswith(str(ROOT.resolve())):
+        full = (self.root / rel).resolve()
+        if not str(full).startswith(str(self.root.resolve())):
             self.send_error(403)
             return
         if full.is_dir():
@@ -123,5 +118,22 @@ class Handler(SimpleHTTPRequestHandler):
             self.wfile.write(data)
 
 
-print(f"Serving {ROOT} on http://0.0.0.0:{PORT}")
-HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
+def make_handler(root: Path):
+    """Create a Handler class with the given root directory."""
+    class ConfiguredHandler(Handler):
+        pass
+    ConfiguredHandler.root = root
+    return ConfiguredHandler
+
+
+def main():
+    """Entry point for the foam-web server."""
+    root = Path(os.environ.get("SERVE_ROOT", Path.home()))
+    port = int(os.environ.get("SERVE_PORT", "8080"))
+
+    print(f"Serving {root} on http://0.0.0.0:{port}")
+    HTTPServer(("0.0.0.0", port), make_handler(root)).serve_forever()
+
+
+if __name__ == "__main__":
+    main()
