@@ -8,50 +8,51 @@ HIGHLIGHT_CSS = FORMATTER.get_style_defs(".highlight")
 
 # Clean, minimal CSS for maximum readability
 CSS = f"""
-/* Typography: system fonts, optimal line length and spacing */
+/* Typography: elegant serif, optimal line length and spacing */
 body {{
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    font-size: 1rem;
-    line-height: 1.6;
+    font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+    font-size: 1.1rem;
+    line-height: 1.65;
     max-width: 42em;
     margin: 2rem auto;
     padding: 0 1.5rem;
-    background: #fff;
-    color: #222;
+    background: #faf9f7;
+    color: #333;
 }}
 
 /* Links: subtle, accessible */
-a {{ color: #0066cc; text-decoration: none; }}
+a {{ color: #1a5f9c; text-decoration: none; }}
 a:hover {{ text-decoration: underline; }}
 
 /* Code blocks */
 pre {{
-    background: #f6f8fa;
+    background: #f0eeeb;
     padding: 1rem;
     overflow-x: auto;
     border-radius: 4px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.5;
 }}
 code {{
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    background: #f6f8fa;
+    background: #f0eeeb;
     padding: 0.15em 0.3em;
     border-radius: 3px;
-    font-size: 0.9em;
+    font-size: 0.85em;
 }}
 pre code {{ background: none; padding: 0; }}
 
 /* Tables */
 table {{ border-collapse: collapse; margin: 1rem 0; }}
 td, th {{ border: 1px solid #ddd; padding: 0.5em 0.75em; text-align: left; }}
-th {{ background: #f6f8fa; }}
+th {{ background: #f0eeeb; }}
 
 /* Navigation breadcrumbs */
 nav {{
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
     margin-bottom: 1.5rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #e0ddd8;
     font-size: 0.9rem;
 }}
 
