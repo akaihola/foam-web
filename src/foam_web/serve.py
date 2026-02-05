@@ -31,6 +31,34 @@ _root: Path = Path(".")
 _port: int = 8000
 
 
+def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path()) -> str:
+    """Build a nested HTML file tree for the sidebar."""
+    entries = sorted(root.iterdir(), key=lambda p: (not p.is_dir(), p.name.lower()))
+    items = []
+    for e in entries:
+        if e.name.startswith("."):
+            continue
+        name = html.escape(e.name)
+        entry_rel = rel / e.name
+        if e.is_dir():
+            children = build_file_tree(e, current, entry_rel)
+            href = f"/{entry_rel}/"
+            is_current = current and current == entry_rel
+            dir_cls = "dir current" if is_current else "dir"
+            items.append(
+                f'<li class="collapsed"><span class="toggle">▼</span>'
+                f'<a class="{dir_cls}" href="{href}">{name}</a>{children}</li>'
+            )
+        else:
+            href = f"/{entry_rel}"
+            is_current = current and current == entry_rel
+            cls = "md" if e.suffix == ".md" else "file"
+            if is_current:
+                cls += " current"
+            items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
+    return f"<ul>{''.join(items)}</ul>" if items else ""
+
+
 def breadcrumbs(rel: Path) -> str:
     parts = ['<a href="/">~</a>']
     accum = Path()
@@ -61,6 +89,7 @@ def serve_dir(rel: Path, full: Path) -> str:
         nav=breadcrumbs(rel),
         body=body,
         livereload=_livereload_script(),
+        sidebar=build_file_tree(_root, current=rel),
     )
 
 
@@ -72,6 +101,7 @@ def serve_md(rel: Path, full: Path) -> str:
         nav=breadcrumbs(rel.parent),
         body=body,
         livereload=_livereload_script(),
+        sidebar=build_file_tree(_root, current=rel),
     )
 
 
@@ -91,6 +121,7 @@ def serve_raw(rel: Path, full: Path) -> str | None:
             nav=breadcrumbs(rel.parent),
             body=body,
             livereload=_livereload_script(),
+            sidebar=build_file_tree(_root, current=rel),
         )
     return None
 
@@ -115,35 +146,47 @@ def make_app(root: Path):
         if full.is_dir():
             content = serve_dir(rel, full)
             data = content.encode("utf-8")
-            start_response("200 OK", [
-                ("Content-Type", "text/html; charset=utf-8"),
-                ("Content-Length", str(len(data))),
-            ])
+            start_response(
+                "200 OK",
+                [
+                    ("Content-Type", "text/html; charset=utf-8"),
+                    ("Content-Length", str(len(data))),
+                ],
+            )
             return [data]
         elif full.is_file() and full.suffix == ".md":
             content = serve_md(rel, full)
             data = content.encode("utf-8")
-            start_response("200 OK", [
-                ("Content-Type", "text/html; charset=utf-8"),
-                ("Content-Length", str(len(data))),
-            ])
+            start_response(
+                "200 OK",
+                [
+                    ("Content-Type", "text/html; charset=utf-8"),
+                    ("Content-Length", str(len(data))),
+                ],
+            )
             return [data]
         elif full.is_file():
             content = serve_raw(rel, full)
             if content:
                 data = content.encode("utf-8")
-                start_response("200 OK", [
-                    ("Content-Type", "text/html; charset=utf-8"),
-                    ("Content-Length", str(len(data))),
-                ])
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", "text/html; charset=utf-8"),
+                        ("Content-Length", str(len(data))),
+                    ],
+                )
                 return [data]
             else:
                 # Serve raw file
                 data = full.read_bytes()
-                start_response("200 OK", [
-                    ("Content-Type", "text/plain; charset=utf-8"),
-                    ("Content-Length", str(len(data))),
-                ])
+                start_response(
+                    "200 OK",
+                    [
+                        ("Content-Type", "text/plain; charset=utf-8"),
+                        ("Content-Length", str(len(data))),
+                    ],
+                )
                 return [data]
         else:
             start_response("404 Not Found", [("Content-Type", "text/plain")])
