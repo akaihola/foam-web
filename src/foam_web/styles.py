@@ -83,10 +83,13 @@ TEMPLATE = """<!doctype html>
 <body>
 <nav>{nav}</nav>
 {body}
+{livereload}
 </body>
 </html>"""
 
+LIVERELOAD_SCRIPT = '<script src="/livereload.js?port={port}&amp;mindelay=10"></script>'
 
-def render_page(title: str, nav: str, body: str) -> str:
+
+def render_page(title: str, nav: str, body: str, livereload: str = "") -> str:
     """Render a complete HTML page with consistent styling."""
-    return TEMPLATE.format(css=CSS, title=title, nav=nav, body=body)
+    return TEMPLATE.format(css=CSS, title=title, nav=nav, body=body, livereload=livereload)
