@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "A simple web server for browsing and rendering Markdown files"
 requires-python = ">=3.12"
 dependencies = [
+    "hupper",
     "livereload",
     "markdown-it-py",
     "mdit-py-plugins",

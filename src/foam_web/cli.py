@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import Annotated, Optional
 
+import hupper
 import typer
 
 from foam_web.serve import run_server
@@ -33,7 +34,15 @@ def serve(
 ):
     """Start the foam-web server."""
     root = (directory or Path(os.environ.get("SERVE_ROOT", Path.cwd()))).resolve()
-    run_server(root, bind, port)
+
+    # Start process reloader to restart server when .py files change
+    restarted = hupper.is_active()
+    reloader = hupper.start_reloader("foam_web.cli.main")
+    app_dir = Path(__file__).parent
+    for py_file in app_dir.glob("*.py"):
+        reloader.watch_files([str(py_file)])
+
+    run_server(root, bind, port, restarted=restarted)
 
 
 def main():
