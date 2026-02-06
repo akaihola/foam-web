@@ -133,8 +133,8 @@ code {{
 pre code {{ background: none; padding: 0; }}
 
 /* Tables */
-table {{ border-collapse: collapse; margin: 1rem 0; }}
-td, th {{ border: 1px solid #ddd; padding: 0.5em 0.75em; text-align: left; }}
+table {{ border-collapse: collapse; margin: 1rem 0; line-height: 1.3; }}
+td, th {{ border: 1px solid #ddd; padding: 0.25em 0.6em; text-align: left; vertical-align: top; }}
 th {{ background: #f0eeeb; }}
 
 /* Navigation breadcrumbs */
