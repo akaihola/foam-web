@@ -2,6 +2,7 @@
 
 import html
 from pathlib import Path
+from urllib.parse import quote
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, guess_lexer
@@ -21,7 +22,7 @@ def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path())
         entry_rel = rel / e.name
         if e.is_dir():
             children = build_file_tree(e, current, entry_rel)
-            href = f"/{entry_rel}/"
+            href = quote(f"/{entry_rel}/")
             is_current = current and current == entry_rel
             dir_cls = "dir current" if is_current else "dir"
             items.append(
@@ -29,7 +30,7 @@ def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path())
                 f'<a class="{dir_cls}" href="{href}">{name}</a>{children}</li>'
             )
         else:
-            href = (
+            href = quote(
                 f"/{entry_rel.with_suffix('')}"
                 if e.suffix == ".md"
                 else f"/{entry_rel}"
@@ -56,7 +57,7 @@ def breadcrumbs(rel: Path) -> str:
     accum = Path()
     for p in rel.parts:
         accum = accum / p
-        parts.append(f'<a href="/{accum}/">{html.escape(p)}</a>')
+        parts.append(f'<a href="{quote(f"/{accum}/")}">{html.escape(p)}</a>')
     return " / ".join(parts)
 
 
@@ -69,11 +70,11 @@ def serve_dir(rel: Path, full: Path, *, root: Path, livereload: str = "") -> str
             continue
         name = html.escape(e.name)
         if e.is_dir():
-            href = f"/{rel / e.name}/"
+            href = quote(f"/{rel / e.name}/")
         elif e.suffix == ".md":
-            href = f"/{(rel / e.name).with_suffix('')}"
+            href = quote(f"/{(rel / e.name).with_suffix('')}")
         else:
-            href = f"/{rel / e.name}"
+            href = quote(f"/{rel / e.name}")
         cls = "dir" if e.is_dir() else ("md" if e.suffix == ".md" else "file")
         items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
     body = f"<ul>{''.join(items)}</ul>" if items else "<p><em>empty</em></p>"

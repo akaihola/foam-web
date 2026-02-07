@@ -1,6 +1,7 @@
 """WSGI application factory for foam-web."""
 
 from pathlib import Path
+from urllib.parse import quote
 
 from foam_web.styles import LIVERELOAD_SCRIPT
 from foam_web.views import serve_dir, serve_md, serve_raw
@@ -13,11 +14,14 @@ def make_app(root: Path, port: int = 8000):
         return LIVERELOAD_SCRIPT.format(port=port)
 
     def app(environ, start_response):
-        path = environ.get("PATH_INFO", "/")
+        raw_path = environ.get("PATH_INFO", "/")
         # Skip livereload.js - let the Server handle it
-        if path == "/livereload.js":
+        if raw_path == "/livereload.js":
             return None
 
+        # Tornado's WSGIContainer already URL-decodes PATH_INFO to raw bytes,
+        # then encodes as latin-1 per PEP 3333. Reverse that to get UTF-8.
+        path = raw_path.encode("latin-1").decode("utf-8")
         rel = Path(path.lstrip("/"))
         full = (root / rel).resolve()
 
@@ -28,7 +32,7 @@ def make_app(root: Path, port: int = 8000):
 
         # Redirect /path/file.md → /path/file
         if full.suffix == ".md" and full.is_file():
-            new_path = path[:-3]  # Strip ".md"
+            new_path = quote(path[:-3])  # Strip ".md", percent-encode
             start_response(
                 "301 Moved Permanently",
                 [("Location", new_path), ("Content-Type", "text/plain")],
