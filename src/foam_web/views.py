@@ -29,8 +29,20 @@ def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path())
                 f'<a class="{dir_cls}" href="{href}">{name}</a>{children}</li>'
             )
         else:
-            href = f"/{entry_rel}"
-            is_current = current and current == entry_rel
+            href = (
+                f"/{entry_rel.with_suffix('')}"
+                if e.suffix == ".md"
+                else f"/{entry_rel}"
+            )
+            compare_entry = (
+                entry_rel.with_suffix("") if e.suffix == ".md" else entry_rel
+            )
+            compare_current = (
+                current.with_suffix("")
+                if current and current.suffix == ".md"
+                else current
+            )
+            is_current = compare_current and compare_current == compare_entry
             cls = "md" if e.suffix == ".md" else "file"
             if is_current:
                 cls += " current"
@@ -56,7 +68,12 @@ def serve_dir(rel: Path, full: Path, *, root: Path, livereload: str = "") -> str
         if e.name.startswith("."):
             continue
         name = html.escape(e.name)
-        href = f"/{rel / e.name}/" if e.is_dir() else f"/{rel / e.name}"
+        if e.is_dir():
+            href = f"/{rel / e.name}/"
+        elif e.suffix == ".md":
+            href = f"/{(rel / e.name).with_suffix('')}"
+        else:
+            href = f"/{rel / e.name}"
         cls = "dir" if e.is_dir() else ("md" if e.suffix == ".md" else "file")
         items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
     body = f"<ul>{''.join(items)}</ul>" if items else "<p><em>empty</em></p>"
