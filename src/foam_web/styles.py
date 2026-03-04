@@ -73,24 +73,27 @@ body {{
 }}
 .file-tree li {{
     margin: 0.15em 0;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
+    display: grid;
+    grid-template-columns: 1em 1fr;
+    grid-template-rows: auto;
 }}
 .file-tree li > ul {{
-    flex-basis: 100%;
+    grid-column: 2 / 3;
+}}
+.file-tree li > a {{
+    grid-column: 2 / 3;
+    word-break: break-word;
+}}
+.file-tree li > a:only-child {{
+    grid-column: 1 / -1;
 }}
 .file-tree .toggle {{
-    display: inline-block;
-    flex-shrink: 0;
+    grid-column: 1 / 2;
+    grid-row: 1;
     width: 1em;
     cursor: pointer;
     user-select: none;
     color: #888;
-}}
-.file-tree li > a {{
-    min-width: 0;
-    word-break: break-word;
 }}
 .file-tree .collapsed > ul {{
     display: none;
