@@ -167,9 +167,13 @@ nav {{
 .file-tree a.dir,
 .file-tree a.file,
 .file-tree a.md {{
-    display: inline-block;
-    padding-left: 1.4em;
-    text-indent: -1.4em;
+    display: inline-flex;
+    align-items: baseline;
+}}
+.file-tree a.dir::before,
+.file-tree a.file::before,
+.file-tree a.md::before {{
+    flex-shrink: 0;
 }}
 
 /* Lists */
