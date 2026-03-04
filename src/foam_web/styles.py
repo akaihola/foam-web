@@ -73,13 +73,24 @@ body {{
 }}
 .file-tree li {{
     margin: 0.15em 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+}}
+.file-tree li > ul {{
+    flex-basis: 100%;
 }}
 .file-tree .toggle {{
     display: inline-block;
+    flex-shrink: 0;
     width: 1em;
     cursor: pointer;
     user-select: none;
     color: #888;
+}}
+.file-tree li > a {{
+    min-width: 0;
+    word-break: break-word;
 }}
 .file-tree .collapsed > ul {{
     display: none;
