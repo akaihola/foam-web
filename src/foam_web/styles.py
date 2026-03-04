@@ -205,7 +205,21 @@ SIDEBAR_JS = """
     var sidebar = document.querySelector('.sidebar');
     var toggle = document.querySelector('.sidebar-toggle');
     var key = 'foam-sidebar-hidden';
-    
+    var SCROLL_KEY = 'foam-sidebar-scroll';
+
+    // Save scroll position continuously and before navigating away
+    sidebar.addEventListener('scroll', function() {
+        localStorage.setItem(SCROLL_KEY, sidebar.scrollTop);
+    });
+    // Also save on any link click inside the sidebar, so the value is
+    // written synchronously before the browser starts the navigation.
+    sidebar.addEventListener('click', function(e) {
+        var a = e.target.closest('a');
+        if (a) {
+            localStorage.setItem(SCROLL_KEY, sidebar.scrollTop);
+        }
+    });
+
     // Restore state
     if (localStorage.getItem(key) === 'true') {
         sidebar.classList.add('hidden');
@@ -254,6 +268,13 @@ SIDEBAR_JS = """
             parent = parent.parentElement;
         }
         saveOpenSet(openSet);
+    }
+
+    // Restore scroll position AFTER all expand/collapse mutations so the
+    // final layout height is known and scrollTop lands in the right place.
+    var savedScroll = localStorage.getItem(SCROLL_KEY);
+    if (savedScroll !== null) {
+        sidebar.scrollTop = parseInt(savedScroll, 10) || 0;
     }
 
     // Toggle on click and persist
