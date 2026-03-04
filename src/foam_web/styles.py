@@ -160,10 +160,17 @@ nav {{
     font-size: 0.9rem;
 }}
 
-/* File listing icons */
+/* File listing icons — hanging indent so wrapped lines align after the icon */
 .dir::before {{ content: "📁 "; }}
 .file::before {{ content: "📄 "; }}
 .md::before {{ content: "📝 "; }}
+.file-tree a.dir,
+.file-tree a.file,
+.file-tree a.md {{
+    display: inline-block;
+    padding-left: 1.4em;
+    text-indent: -1.4em;
+}}
 
 /* Lists */
 ul {{ padding-left: 1.5em; }}
