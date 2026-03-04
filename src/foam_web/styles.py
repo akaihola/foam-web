@@ -161,14 +161,15 @@ nav {{
 }}
 
 /* File listing icons — hanging indent so wrapped lines align after the icon */
-.dir::before {{ content: "📁 "; }}
-.file::before {{ content: "📄 "; }}
-.md::before {{ content: "📝 "; }}
+.dir::before {{ content: "📁"; }}
+.file::before {{ content: "📄"; }}
+.md::before {{ content: "📝"; }}
 .file-tree a.dir,
 .file-tree a.file,
 .file-tree a.md {{
     display: inline-flex;
     align-items: baseline;
+    gap: 0.3em;
 }}
 .file-tree a.dir::before,
 .file-tree a.file::before,

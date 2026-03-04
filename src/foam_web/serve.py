@@ -17,13 +17,18 @@ def run_server(root: Path, bind: str, port: int, restarted: bool = False):
 
     # After a hupper restart, trigger a browser reload once livereload.js reconnects
     if restarted:
-        app_dir = Path(__file__).parent
 
         def _delayed_reload():
             import time
+            import urllib.request
 
             time.sleep(1)
-            server.watcher._changes.append((str(app_dir / "__init__.py"), None))
+            try:
+                urllib.request.urlopen(
+                    f"http://127.0.0.1:{port}/forcereload", timeout=2
+                )
+            except Exception:
+                pass
 
         threading.Thread(target=_delayed_reload, daemon=True).start()
 
