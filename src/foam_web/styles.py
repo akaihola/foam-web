@@ -74,7 +74,7 @@ body {{
 .file-tree li {{
     margin: 0.15em 0;
     display: grid;
-    grid-template-columns: 1em 1fr;
+    grid-template-columns: 1.4em 1fr;
     grid-template-rows: auto;
 }}
 .file-tree li > ul {{
