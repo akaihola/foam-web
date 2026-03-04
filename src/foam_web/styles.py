@@ -167,7 +167,8 @@ nav {{
 .md::before {{ content: "📝"; }}
 .file-tree a.dir,
 .file-tree a.file,
-.file-tree a.md {{
+.file-tree a.md,
+.file-tree a.img-file {{
     display: inline-flex;
     align-items: baseline;
     gap: 0.3em;
@@ -176,6 +177,14 @@ nav {{
 .file-tree a.file::before,
 .file-tree a.md::before {{
     flex-shrink: 0;
+}}
+.tree-thumb {{
+    width: 1em;
+    height: 1em;
+    object-fit: cover;
+    flex-shrink: 0;
+    vertical-align: middle;
+    border-radius: 2px;
 }}
 
 /* Lists */

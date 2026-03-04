@@ -4,6 +4,8 @@ import html
 from pathlib import Path
 from urllib.parse import quote
 
+IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".svg"}
+
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, guess_lexer
 
@@ -44,10 +46,19 @@ def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path())
                 else current
             )
             is_current = compare_current and compare_current == compare_entry
-            cls = "md" if e.suffix == ".md" else "file"
+            if e.suffix == ".md":
+                cls = "md"
+            elif e.suffix.lower() in IMAGE_SUFFIXES:
+                cls = "img-file"
+            else:
+                cls = "file"
             if is_current:
                 cls += " current"
-            items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
+            if e.suffix.lower() in IMAGE_SUFFIXES:
+                img = f'<img src="{href}" alt="" class="tree-thumb">'
+                items.append(f'<li><a class="{cls}" href="{href}">{img}{name}</a></li>')
+            else:
+                items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
     return f"<ul>{''.join(items)}</ul>" if items else ""
 
 
@@ -75,8 +86,19 @@ def serve_dir(rel: Path, full: Path, *, root: Path, livereload: str = "") -> str
             href = quote(f"/{(rel / e.name).with_suffix('')}")
         else:
             href = quote(f"/{rel / e.name}")
-        cls = "dir" if e.is_dir() else ("md" if e.suffix == ".md" else "file")
-        items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
+        if e.is_dir():
+            cls = "dir"
+        elif e.suffix == ".md":
+            cls = "md"
+        elif e.suffix.lower() in IMAGE_SUFFIXES:
+            cls = "img-file"
+        else:
+            cls = "file"
+        if e.suffix.lower() in IMAGE_SUFFIXES:
+            img = f'<img src="{href}" alt="" class="tree-thumb">'
+            items.append(f'<li><a class="{cls}" href="{href}">{img}{name}</a></li>')
+        else:
+            items.append(f'<li><a class="{cls}" href="{href}">{name}</a></li>')
     body = f"<ul>{''.join(items)}</ul>" if items else "<p><em>empty</em></p>"
     return render_page(
         title=str(rel) or "~",
