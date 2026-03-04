@@ -1,5 +1,6 @@
 """WSGI application factory for foam-web."""
 
+import mimetypes
 from pathlib import Path
 from urllib.parse import quote
 
@@ -76,12 +77,20 @@ def make_app(root: Path, port: int = 8000):
                 )
                 return [data]
             else:
-                # Serve raw file
+                # Serve raw file with correct MIME type
                 data = full.read_bytes()
+                mime_type, _ = mimetypes.guess_type(full.name)
+                if mime_type is None:
+                    mime_type = "application/octet-stream"
+                content_type = (
+                    f"{mime_type}; charset=utf-8"
+                    if mime_type.startswith("text/")
+                    else mime_type
+                )
                 start_response(
                     "200 OK",
                     [
-                        ("Content-Type", "text/plain; charset=utf-8"),
+                        ("Content-Type", content_type),
                         ("Content-Length", str(len(data))),
                     ],
                 )
