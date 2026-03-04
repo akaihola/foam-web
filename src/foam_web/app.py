@@ -32,7 +32,7 @@ def make_app(root: Path, port: int = 8000):
             return [b"Forbidden"]
 
         # Redirect /path/file.md → /path/file
-        if full.suffix == ".md" and full.is_file():
+        if path.endswith(".md") and full.is_file():
             new_path = quote(path[:-3])  # Strip ".md", percent-encode
             start_response(
                 "301 Moved Permanently",
@@ -53,7 +53,7 @@ def make_app(root: Path, port: int = 8000):
                 ],
             )
             return [data]
-        elif full.is_file() and full.suffix == ".md":
+        elif full.is_file() and str(full).endswith(".md"):
             content = serve_md(rel, full, root=root, livereload=livereload)
             data = content.encode("utf-8")
             start_response(
@@ -97,13 +97,13 @@ def make_app(root: Path, port: int = 8000):
                 return [data]
         else:
             # Try appending .md for extensionless markdown URLs
-            md_full = full.with_suffix(".md")
+            md_full = Path(str(full) + ".md")
             if md_full.is_file():
                 # Re-run security check on the .md path
                 if not str(md_full.resolve()).startswith(str(root.resolve())):
                     start_response("403 Forbidden", [("Content-Type", "text/plain")])
                     return [b"Forbidden"]
-                md_rel = rel.with_suffix(".md")
+                md_rel = Path(str(rel) + ".md")
                 content = serve_md(md_rel, md_full, root=root, livereload=livereload)
                 data = content.encode("utf-8")
                 start_response(

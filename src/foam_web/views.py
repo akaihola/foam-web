@@ -33,15 +33,15 @@ def build_file_tree(root: Path, current: Path | None = None, rel: Path = Path())
             )
         else:
             href = quote(
-                f"/{entry_rel.with_suffix('')}"
+                f"/{str(entry_rel)[:-3]}"
                 if e.suffix == ".md"
                 else f"/{entry_rel}"
             )
             compare_entry = (
-                entry_rel.with_suffix("") if e.suffix == ".md" else entry_rel
+                Path(str(entry_rel)[:-3]) if e.suffix == ".md" else entry_rel
             )
             compare_current = (
-                current.with_suffix("")
+                Path(str(current)[:-3])
                 if current and current.suffix == ".md"
                 else current
             )
@@ -83,7 +83,7 @@ def serve_dir(rel: Path, full: Path, *, root: Path, livereload: str = "") -> str
         if e.is_dir():
             href = quote(f"/{rel / e.name}/")
         elif e.suffix == ".md":
-            href = quote(f"/{(rel / e.name).with_suffix('')}")
+            href = quote(f"/{str(rel / e.name)[:-3]}")
         else:
             href = quote(f"/{rel / e.name}")
         if e.is_dir():
