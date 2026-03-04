@@ -90,6 +90,7 @@ body {{
 .file-tree .toggle {{
     grid-column: 1 / 2;
     grid-row: 1;
+    align-self: start;
     width: 1em;
     cursor: pointer;
     user-select: none;
