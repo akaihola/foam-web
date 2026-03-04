@@ -180,25 +180,61 @@ SIDEBAR_JS = """
         localStorage.setItem(key, sidebar.classList.contains('hidden'));
     };
     
-    // Expand/collapse folders
-    document.querySelectorAll('.file-tree .toggle').forEach(function(t) {
-        t.onclick = function(e) {
-            e.stopPropagation();
-            t.parentElement.classList.toggle('collapsed');
-        };
+    // Expand/collapse folders, persisting state in localStorage
+    var TREE_KEY = 'foam-tree-open';
+    function loadOpenSet() {
+        try { return new Set(JSON.parse(localStorage.getItem(TREE_KEY) || '[]')); }
+        catch(e) { return new Set(); }
+    }
+    function saveOpenSet(s) {
+        try { localStorage.setItem(TREE_KEY, JSON.stringify(Array.from(s))); }
+        catch(e) {}
+    }
+    function folderPath(li) {
+        // Use the href of the folder's anchor as a stable key
+        var a = li.querySelector(':scope > a');
+        return a ? a.getAttribute('href') : null;
+    }
+
+    // Restore persisted open/closed state before auto-expand
+    var openSet = loadOpenSet();
+    document.querySelectorAll('.file-tree li.collapsed').forEach(function(li) {
+        var fp = folderPath(li);
+        if (fp && openSet.has(fp)) {
+            li.classList.remove('collapsed');
+        }
     });
-    
-    // Auto-expand path to current file
+
+    // Auto-expand path to current file/folder (always, regardless of saved state)
     var current = document.querySelector('.file-tree a.current');
     if (current) {
         var parent = current.parentElement;
         while (parent && !parent.classList.contains('file-tree')) {
             if (parent.tagName === 'LI') {
                 parent.classList.remove('collapsed');
+                var fp = folderPath(parent);
+                if (fp) openSet.add(fp);
             }
             parent = parent.parentElement;
         }
+        saveOpenSet(openSet);
     }
+
+    // Toggle on click and persist
+    document.querySelectorAll('.file-tree .toggle').forEach(function(t) {
+        t.onclick = function(e) {
+            e.stopPropagation();
+            var li = t.parentElement;
+            li.classList.toggle('collapsed');
+            var fp = folderPath(li);
+            if (fp) {
+                var s = loadOpenSet();
+                if (li.classList.contains('collapsed')) { s.delete(fp); }
+                else { s.add(fp); }
+                saveOpenSet(s);
+            }
+        };
+    });
 })();
 </script>
 """
